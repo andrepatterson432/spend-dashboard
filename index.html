@@ -1,1 +1,184 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0c10">
+<title>Andre · Spend Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0c10; --surf:#111318; --surf2:#181c24; --bdr:#1f2430;
+  --amber:#f5a623; --red:#e05c4b; --green:#4bc9a0; --blue:#5b8fff;
+  --text:#f0f2f5; --muted:#6b7385; --muted2:#8f96a8; --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;}
+button{font-family:'DM Sans',sans-serif;cursor:pointer;}
+textarea{font-family:monospace;}
+#hdr{background:linear-gradient(160deg,#0d1117,#161c28);border-bottom:1px solid var(--bdr);padding:20px 16px 16px;position:sticky;top:0;z-index:100;}
+#hdr-inner{display:flex;justify-content:space-between;align-items:flex-start;}
+.hdr-sub{font-size:11px;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;}
+.hdr-name{font-family:'Bebas Neue',cursive;font-size:28px;color:var(--amber);line-height:1;}
+.hdr-period{font-size:11px;color:var(--muted);margin-top:2px;}
+#live-badge{background:rgba(75,201,160,.12);border:1px solid rgba(75,201,160,.3);border-radius:20px;padding:4px 10px;font-size:10px;color:var(--green);font-weight:500;display:none;}
+#tabs{display:flex;gap:4px;background:var(--surf);border-bottom:1px solid var(--bdr);padding:8px 12px;overflow-x:auto;scrollbar-width:none;}
+#tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1px solid transparent;background:transparent;color:var(--muted2);font-size:12px;font-weight:500;transition:all .2s;}
+.tab.on{background:var(--amber);color:#000;border-color:var(--amber);font-weight:600;}
+#content{padding:14px 12px 100px;max-width:480px;margin:0 auto;}
+.sec{display:none;}.sec.on{display:block;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.card.a::before{background:var(--amber)}.card.r::before{background:var(--red)}.card.g::before{background:var(--green)}.card.b::before{background:var(--blue)}
+.card .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.card .val{font-family:'Bebas Neue',cursive;font-size:26px;line-height:1;}
+.card.a .val{color:var(--amber)}.card.r .val{color:var(--red)}.card.g .val{color:var(--green)}.card.b .val{color:var(--blue)}
+.card .sub{font-size:10px;color:var(--muted);margin-top:4px;}
+.wide{grid-column:span 2;}
+.stitle{font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:.06em;color:var(--muted2);margin:18px 0 10px;display:flex;align-items:center;gap:8px;}
+.stitle::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.al{border-radius:var(--r);padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;border:1px solid;}
+.al.w{background:rgba(245,166,35,.07);border-color:rgba(245,166,35,.3);}
+.al.d{background:rgba(224,92,75,.07);border-color:rgba(224,92,75,.3);}
+.al.i{background:rgba(91,143,255,.07);border-color:rgba(91,143,255,.3);}
+.al.g{background:rgba(75,201,160,.07);border-color:rgba(75,201,160,.3);}
+.al-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
+.al-ttl{font-size:12px;font-weight:600;margin-bottom:3px;}
+.al.w .al-ttl{color:var(--amber)}.al.d .al-ttl{color:var(--red)}.al.i .al-ttl{color:var(--blue)}.al.g .al-ttl{color:var(--green)}
+.al-txt{font-size:12px;color:var(--muted2);line-height:1.6;}
+.mchart{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:14px;}
+.mbars{display:flex;align-items:flex-end;gap:8px;height:80px;margin-bottom:8px;}
+.mcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.mbar{width:100%;border-radius:5px 5px 0 0;min-height:6px;}
+.mlbls{display:flex;gap:8px;}
+.mlbl{flex:1;text-align:center;font-size:10px;color:var(--muted);}
+.lst{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
+.li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--bdr);}
+.li:last-child{border-bottom:none;}
+.ico{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.li-info{flex:1;}
+.li-name{font-size:13px;font-weight:500;}
+.li-note{font-size:10px;color:var(--muted);margin-top:2px;}
+.bar4{background:var(--surf2);border-radius:3px;height:4px;margin-top:5px;overflow:hidden;}
+.bar4f{height:100%;border-radius:3px;}
+.li-amt{font-family:'Bebas Neue',cursive;font-size:17px;text-align:right;}
+.li-pct{font-size:10px;color:var(--muted);text-align:right;}
+.ri{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid var(--bdr);}
+.ri:last-child{border-bottom:none;}
+.ri-name{font-size:13px;font-weight:500;}
+.ri-note{font-size:10px;color:var(--muted);}
+.ri-amt{font-family:'Bebas Neue',cursive;font-size:16px;color:var(--red);}
+.ri.cut{opacity:.45;}.ri.cut .ri-name{text-decoration:line-through;}
+.scard{background:linear-gradient(135deg,rgba(75,201,160,.1),rgba(91,143,255,.08));border:1px solid rgba(75,201,160,.25);border-radius:var(--r);padding:16px;margin-bottom:14px;}
+.stl{font-family:'Bebas Neue',cursive;font-size:20px;color:var(--green);margin-bottom:8px;}
+.srow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px;}
+.srow:last-child{border-bottom:none;}
+.sl{color:var(--muted2);}.sv{font-weight:600;color:var(--green);}
+.bli{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bdr);}
+.bli:last-child{border-bottom:none;}
+.bp{background:var(--surf2);border-radius:3px;height:4px;margin-top:5px;overflow:hidden;}
+.bpf{height:100%;border-radius:3px;}
+#csv-area{width:100%;min-height:160px;background:var(--surf2);border:1px solid var(--bdr);border-radius:12px;padding:12px;color:var(--text);font-size:11px;resize:vertical;outline:none;line-height:1.5;margin-bottom:10px;}
+#csv-area:focus{border-color:var(--amber);}
+#update-btn{width:100%;padding:14px;background:var(--amber);border:none;border-radius:12px;font-family:'Bebas Neue',cursive;font-size:18px;color:#000;letter-spacing:.06em;}
+#update-btn:active{opacity:.8;}
+#update-status{margin-top:10px;padding:10px 14px;border-radius:12px;font-size:12px;font-weight:500;display:none;}
+#update-status.ok{background:rgba(75,201,160,.1);border:1px solid rgba(75,201,160,.3);color:var(--green);}
+#update-status.err{background:rgba(224,92,75,.1);border:1px solid rgba(224,92,75,.3);color:var(--red);}
+#empty{text-align:center;padding:60px 20px;}
+#empty-icon{font-size:48px;margin-bottom:16px;}
+#empty h2{font-family:'Bebas Neue',cursive;font-size:24px;color:var(--amber);margin-bottom:8px;}
+#empty p{font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:20px;}
+#go-update{padding:12px 28px;background:var(--amber);border:none;border-radius:12px;font-family:'Bebas Neue',cursive;font-size:18px;color:#000;letter-spacing:.06em;}
+.pill{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;margin-left:5px;}
+.pill-r{background:rgba(224,92,75,.15);color:var(--red);border:1px solid rgba(224,92,75,.3);}
+.pill-g{background:rgba(75,201,160,.15);color:var(--green);border:1px solid rgba(75,201,160,.3);}
+.dlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:8px 14px 2px;}
+</style>
+</head>
+<body>
+<div id="hdr">
+  <div id="hdr-inner">
+    <div>
+      <div class="hdr-sub">Personal Finance · Rolling 90 Days</div>
+      <div class="hdr-name">ANDRE PATTERSON</div>
+      <div class="hdr-period" id="hdr-period">No data loaded</div>
+    </div>
+    <div id="live-badge">✓ LIVE</div>
+  </div>
+</div>
+<div id="tabs">
+  <button class="tab on" onclick="showTab('overview',this)">Overview</button>
+  <button class="tab" onclick="showTab('spend',this)">Spend</button>
+  <button class="tab" onclick="showTab('subs',this)">Subs</button>
+  <button class="tab" onclick="showTab('budget',this)">Budget</button>
+  <button class="tab" onclick="showTab('update',this)">⟳ Update</button>
+</div>
+<div id="content">
+  <div class="sec on" id="tab-overview">
+    <div id="empty">
+      <div id="empty-icon">📊</div>
+      <h2>No Data Yet</h2>
+      <p>Export your transactions from Rocket Money and paste them in the Update tab.</p>
+      <button id="go-update" onclick="showTab('update',document.querySelectorAll('.tab')[4])">LOAD DATA →</button>
+    </div>
+    <div id="overview-content" style="display:none"></div>
+  </div>
+  <div class="sec" id="tab-spend"><div id="spend-content"></div></div>
+  <div class="sec" id="tab-subs"><div id="subs-content"></div></div>
+  <div class="sec" id="tab-budget"><div id="budget-content"></div></div>
+  <div class="sec" id="tab-update">
+    <div class="al i" style="margin-bottom:14px">
+      <div class="al-ico">📲</div>
+      <div>
+        <div class="al-ttl">How to Export from Rocket Money</div>
+        <div class="al-txt"><strong>App:</strong> Transactions → menu icon (top right) → CSV Download → Export.<br><strong>Web:</strong> Transactions → Export → check email for download link.</div>
+      </div>
+    </div>
+    <div id="last-updated-row" style="display:none;background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--muted);">
+      Last updated: <span id="last-updated-ts" style="color:var(--green)"></span>
+    </div>
+    <div style="font-size:13px;color:var(--muted2);margin-bottom:8px;font-weight:500;">Paste CSV here:</div>
+    <textarea id="csv-area" placeholder="Date,Original Date,Account Type,Account Name..."></textarea>
+    <button id="update-btn" onclick="handleUpdate()">UPDATE DASHBOARD</button>
+    <div id="update-status"></div>
+    <div style="margin-top:20px;" class="lst">
+      <div class="dlbl">Auto-Excluded From Personal Spend</div>
+      <div class="ri"><div><div class="ri-name">🏢 Business passthroughs</div><div class="ri-note">DirecTV Champs, 7Shifts, ASCM cert</div></div></div>
+      <div class="ri"><div><div class="ri-name">💳 CC payoffs & loan payments</div><div class="ri-note">Not counted as spending</div></div></div>
+      <div class="ri"><div><div class="ri-name">💰 Savings transfers</div><div class="ri-note">Moving money ≠ spending</div></div></div>
+      <div class="ri"><div><div class="ri-name">📥 Income & deposits</div><div class="ri-note">Credits filtered automatically</div></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const STORAGE_KEY='andre_spend_v2';
+const BIZ_KW=['7shifts','directv service','apics','ascm'];
+const EXCL_CATS=['Loan Payment','Credit Card Payment','Savings Transfer','Internal Transfers','Income','Credit Card Payments'];
+const SUB_KW=['netflix','spotify','peacock','paramount','youtube tv','fubotv','siriusxm','apple.com','prime video','nfl+','hulu','appletv','apple tv','disney+'];
+const CUT_KW=['paramount','fubotv','siriusxm'];
+const CAT_META={'Bills & Utilities':{icon:'⚡',c:'#f5a623'},'Shopping':{icon:'🛍️',c:'#e05c4b'},'Entertainment & Rec.':{icon:'🎬',c:'#5b8fff'},'Dining & Drinks':{icon:'🍻',c:'#f5a623'},'Uncategorized':{icon:'❓',c:'#888'},'Cash & Checks':{icon:'💵',c:'#e05c4b'},'Travel & Vacation':{icon:'✈️',c:'#4bc9a0'},'Auto & Transport':{icon:'⛽',c:'#5b8fff'},'Home & Garden':{icon:'🏡',c:'#4bc9a0'},'Groceries':{icon:'🛒',c:'#f5a623'},'Fees':{icon:'🔥',c:'#e05c4b'},'Charitable Donations':{icon:'🙏',c:'#4bc9a0'},'Medical':{icon:'🏥',c:'#5b8fff'},'Software & Tech':{icon:'💻',c:'#888'},'Health & Wellness':{icon:'💪',c:'#4bc9a0'},'Personal Care':{icon:'🧴',c:'#888'},'Education':{icon:'📚',c:'#5b8fff'},'Business':{icon:'💼',c:'#888'},'Investment':{icon:'📈',c:'#4bc9a0'}};
+const BUDGET_TARGETS={'Dining & Drinks':500,'Groceries':400,'Auto & Transport':350,'Shopping':400,'Cash & Checks':200,'Entertainment & Rec.':150,'Uncategorized':200,'Home & Garden':300,'Travel & Vacation':300,'Medical':250,'Fees':0};
+const MCOLORS=['#5b8fff','#e05c4b','#f5a623','#4bc9a0','#9b6fff','#ff8c5a'];
+const fmt=n=>'$'+Math.abs(Math.round(n)).toLocaleString('en-US');
+const fmtDate=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const isBiz=r=>{const t=((r.Description||r.Name||'')+(r['Custom Name']||'')).toLowerCase();return BIZ_KW.some(k=>t.includes(k));};
+function parseCSV(text){const lines=text.trim().split('\n');if(lines.length<2)return[];const headers=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());return lines.slice(1).map(line=>{const vals=[];let cur='',inQ=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){vals.push(cur.trim());cur='';}else cur+=c;}vals.push(cur.trim());const obj={};headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^"|"$/g,'').trim());return obj;}).filter(r=>r.Date&&r.Amount);}
+function processData(rows){const dated=rows.map(r=>({...r,_d:new Date(r.Date),_a:parseFloat(r.Amount)||0})).filter(r=>!isNaN(r._d.getTime()));if(!dated.length)return null;const maxD=new Date(Math.max(...dated.map(r=>r._d)));const minD=new Date(maxD);minD.setDate(minD.getDate()-90);const d90=dated.filter(r=>r._d>=minD);const charges=d90.filter(r=>r._a>0&&!isBiz(r));const income=d90.filter(r=>r._a<0&&(r['Account Type']||'').toLowerCase().includes('check')).reduce((s,r)=>s+Math.abs(r._a),0);const lifestyle=charges.filter(r=>!EXCL_CATS.includes(r.Category));const fees=charges.filter(r=>r.Category==='Fees').reduce((s,r)=>s+r._a,0);const catMap={};lifestyle.forEach(r=>{const cat=r.Category||'Uncategorized';catMap[cat]=(catMap[cat]||0)+r._a;});const categories=Object.entries(catMap).map(([name,amount])=>({name,amount:Math.round(amount*100)/100,...(CAT_META[name]||{icon:'💳',c:'#888'})})).sort((a,b)=>b.amount-a.amount);const mMap={};lifestyle.forEach(r=>{const k=`${r._d.getFullYear()}-${String(r._d.getMonth()+1).padStart(2,'0')}`;mMap[k]=(mMap[k]||0)+r._a;});const months=Object.entries(mMap).sort(([a],[b])=>a.localeCompare(b)).map(([k,amount])=>{const[y,m]=k.split('-');return{key:k,label:new Date(+y,+m-1,1).toLocaleString('default',{month:'short'})+' '+y,amount:Math.round(amount)};});const mchMap={};lifestyle.forEach(r=>{const n=r['Custom Name']||r.Name||'Unknown';mchMap[n]=(mchMap[n]||0)+r._a;});const topMerchants=Object.entries(mchMap).map(([name,amount])=>({name,amount:Math.round(amount*100)/100})).sort((a,b)=>b.amount-a.amount).slice(0,10);const subMap={};charges.forEach(r=>{const n=(r['Custom Name']||r.Name||'').toLowerCase();if(SUB_KW.some(k=>n.includes(k))){const dn=r['Custom Name']||r.Name;subMap[dn]=(subMap[dn]||0)+r._a;}});const subscriptions=Object.entries(subMap).map(([name,amount])=>({name,amount:Math.round(amount*100)/100})).sort((a,b)=>b.amount-a.amount);const subTotal=subscriptions.reduce((s,r)=>s+r.amount,0);const numMonths=Math.max(months.length,1);const lifestyleTotal=lifestyle.reduce((s,r)=>s+r._a,0);const monthlyAvg=lifestyleTotal/numMonths;const monthlyIncome=income/3;return{dateRange:{min:minD,max:maxD},totalTxns:d90.length,lifestyleTotal:Math.round(lifestyleTotal),monthlyAvg:Math.round(monthlyAvg),income:Math.round(income),monthlyIncome:Math.round(monthlyIncome),monthlyGap:Math.round(monthlyAvg-monthlyIncome),fees:Math.round(fees),categories,months,topMerchants,subscriptions,subTotal:Math.round(subTotal),numMonths};}
+function al(t,icon,title,text){return `<div class="al ${t[0]}"><div class="al-ico">${icon}</div><div><div class="al-ttl">${title}</div><div class="al-txt">${text}</div></div></div>`;}
+function renderOverview(D){const gap=D.monthlyGap;let html=`<div class="grid"><div class="card a"><div class="lbl">Lifestyle Spend (90d)</div><div class="val">${fmt(D.lifestyleTotal)}</div><div class="sub">biz passthroughs excluded</div></div><div class="card b"><div class="lbl">Avg / Month</div><div class="val">${fmt(D.monthlyAvg)}</div><div class="sub">personal lifestyle</div></div><div class="card g"><div class="lbl">Visible Income (90d)</div><div class="val">${fmt(D.income)}</div><div class="sub">checking deposits</div></div><div class="card ${gap>0?'r':'g'}"><div class="lbl">Monthly Gap</div><div class="val">${gap>0?'-':'+'}${fmt(gap)}</div><div class="sub">${gap>0?'spend > income':'income > spend'}</div></div><div class="card r wide"><div class="lbl">Fees & Interest <span class="pill pill-r">PURE WASTE</span></div><div class="val">${fmt(D.fees)}</div><div class="sub">interest + late fees + cash advance — all avoidable</div></div></div>`;if(D.months.length){const max=Math.max(...D.months.map(m=>m.amount));html+=`<div class="mchart"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Monthly Lifestyle Spend</div><div class="mbars">${D.months.map((m,i)=>`<div class="mcol"><div style="font-size:9px;color:var(--muted2);font-weight:500">${fmt(m.amount)}</div><div class="mbar" style="height:${max>0?Math.round(m.amount/max*100):5}%;background:${MCOLORS[i%MCOLORS.length]}"></div></div>`).join('')}</div><div class="mlbls">${D.months.map(m=>`<div class="mlbl">${m.label}</div>`).join('')}</div></div>`;}html+=`<div class="stitle">Highlights</div>`;if(gap>0)html+=al('d','📊',`Spending ${fmt(gap)}/mo More Than You Make`,`Visible income: ${fmt(D.monthlyIncome)}/mo. Personal spend: ${fmt(D.monthlyAvg)}/mo. This gap is floated on credit cards.`);if(D.fees>100)html+=al('w','💸',`${fmt(D.fees)} in Fees — Set Autopay Today`,'Late fees and interest are pure waste. Set autopay on minimum payments for every card right now.');if(D.subTotal>300)html+=al('w','📺',`${fmt(D.subTotal)} in Subscriptions (90d)`,`~${fmt(Math.round(D.subTotal/D.numMonths))}/mo. Check the Subs tab for overlap.`);html+=al('i','📅',`${D.totalTxns} Transactions Analyzed`,`${fmtDate(D.dateRange.min)} → ${fmtDate(D.dateRange.max)}. Business passthroughs removed.`);document.getElementById('overview-content').innerHTML=html;document.getElementById('overview-content').style.display='block';document.getElementById('empty').style.display='none';}
+function renderSpend(D){const max=D.categories[0]?.amount||1;const total=D.categories.reduce((s,c)=>s+c.amount,0);let html=`<div style="font-size:11px;color:var(--muted);margin-bottom:12px">Excludes mortgage, CC payoffs, savings & biz passthroughs.</div><div class="lst">${D.categories.map(c=>`<div class="li"><div class="ico" style="background:${c.c}22">${c.icon}</div><div class="li-info"><div class="li-name">${c.name}</div><div class="bar4"><div class="bar4f" style="width:${Math.round(c.amount/max*100)}%;background:${c.c}"></div></div></div><div><div class="li-amt" style="color:${c.c}">${fmt(c.amount)}</div><div class="li-pct">${(c.amount/total*100).toFixed(1)}%</div></div></div>`).join('')}</div>`;html+=`<div class="stitle">Top Merchants</div><div class="lst">${D.topMerchants.map(m=>`<div class="ri"><div class="ri-name">${m.name}</div><div class="ri-amt">${fmt(m.amount)}</div></div>`).join('')}</div>`;document.getElementById('spend-content').innerHTML=html;}
+function renderSubs(D){const mo=D.numMonths;let html=al('w','⚡',`${fmt(D.subTotal)} in 90 Days · ${fmt(Math.round(D.subTotal/mo))}/mo`,'Look for overlapping live TV services. Cutting 2–3 = $100–150/mo saved.');html+=`<div class="lst">${D.subscriptions.map(s=>{const cut=CUT_KW.some(k=>s.name.toLowerCase().includes(k));return`<div class="ri${cut?' cut':''}"><div><div class="ri-name">${s.name}${cut?'<span class="pill pill-r">✂️ REVIEW</span>':'<span class="pill pill-g">KEEP</span>'}</div><div class="ri-note">~${fmt(Math.round(s.amount/mo))}/mo avg</div></div><div class="ri-amt">${fmt(s.amount)}</div></div>`;}).join('')}</div>`;html+=`<div class="stitle">Recommended Cuts</div><div class="scard"><div class="stl">Cut Overlap → $111+/mo Saved</div><div class="srow"><span class="sl">✂️ Paramount+ (~$54/mo)</span><span class="sv">+$54</span></div><div class="srow"><span class="sl">✂️ FuboTV personal (~$37/mo)</span><span class="sv">+$37</span></div><div class="srow"><span class="sl">✂️ SiriusXM if using Apple Music</span><span class="sv">+$20</span></div><div class="srow"><span class="sl">✓ Keep: YouTube TV, Netflix, Spotify, Apple, Peacock, NFL+</span><span class="sv">—</span></div><div class="srow" style="border-top:1px solid rgba(75,201,160,.3);margin-top:4px;padding-top:10px"><span class="sl" style="font-weight:600;color:var(--text)">Monthly savings</span><span class="sv" style="font-size:20px;font-family:'Bebas Neue',cursive">$111/mo</span></div></div>`;document.getElementById('subs-content').innerHTML=html;}
+function renderBudget(D){const mo=D.numMonths;const catByName={};D.categories.forEach(c=>{catByName[c.name]={...c,monthly:Math.round(c.amount/mo)};});let html=`<div style="background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:14px"><p style="font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:8px">You're at <strong style="color:var(--text)">${fmt(D.monthlyAvg)}/mo</strong> personal lifestyle vs. ${fmt(D.monthlyIncome)}/mo visible income. ${D.monthlyGap>0?`That's a ${fmt(D.monthlyGap)}/mo gap floated on credit.`:"You're covering your lifestyle — now stack savings."}</p><p style="font-size:12px;color:var(--green);font-weight:500">Goal: Free up $1,500+/mo → kill interest → emergency fund → MBA fund.</p></div>`;html+=`<div class="scard"><div class="stl">Monthly Savings Potential</div>${[['Set autopay → no late fees',20],['Pay Citi in full → kill interest',212],['Cut 3 streaming overlaps',111],['Dining budget ($500/mo target)',300],['Cap ATM/cash at $200/mo',554],['Shopping discipline',500]].map(([l,v])=>`<div class="srow"><span class="sl">${l}</span><span class="sv">+${fmt(v)}</span></div>`).join('')}<div class="srow" style="border-top:1px solid rgba(75,201,160,.3);margin-top:4px;padding-top:10px"><span class="sl" style="font-weight:600;color:var(--text)">Total freed per month</span><span class="sv" style="font-size:22px;font-family:'Bebas Neue',cursive">$1,697</span></div></div>`;html+=`<div class="stitle">Category Targets</div><div class="lst">`;Object.entries(BUDGET_TARGETS).forEach(([cat,target])=>{const c=catByName[cat];if(!c)return;const over=c.monthly>target;const pct=target>0?Math.min(Math.round(c.monthly/target*100),100):100;const bc=over?'#e05c4b':'#4bc9a0';const meta=CAT_META[cat]||{icon:'💳'};html+=`<div class="bli"><div style="flex:1"><div style="font-size:13px;font-weight:500">${meta.icon} ${cat}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Current: ${fmt(c.monthly)}/mo</div><div class="bp"><div class="bpf" style="width:${pct}%;background:${bc}"></div></div></div><div style="text-align:right;margin-left:12px"><div style="font-family:'Bebas Neue',cursive;font-size:17px;color:${bc}">${fmt(target)}</div><div style="font-size:10px;color:${bc};margin-top:2px">${over?`↓ Cut ${fmt(c.monthly-target)}`:'✓ On track'}</div></div></div>`;});html+=`</div><div class="stitle">12-Month Roadmap</div><div class="scard"><div class="stl">If You Execute This Budget</div><div class="srow"><span class="sl">Mo 1–2: Autopay on all cards</span><span class="sv">$0 late fees</span></div><div class="srow"><span class="sl">Mo 1–3: $800/mo → Citi balance</span><span class="sv">Kill interest</span></div><div class="srow"><span class="sl">Mo 3–6: Build $5K emergency fund</span><span class="sv">~$900/mo</span></div><div class="srow"><span class="sl">Mo 6–12: MBA fund (Fall 2026)</span><span class="sv">$500/mo</span></div><div class="srow"><span class="sl">Savings built in 12 months</span><span class="sv">~$8,400</span></div><div class="srow"><span class="sl">Interest eliminated vs. current</span><span class="sv">~$2,500</span></div></div><div style="text-align:center;font-size:10px;color:var(--muted);padding-top:8px">Mortgage and loan payments excluded.</div>`;document.getElementById('budget-content').innerHTML=html;}
+function renderAll(D){document.getElementById('hdr-period').textContent=`${fmtDate(D.dateRange.min)} → ${fmtDate(D.dateRange.max)} · ${D.totalTxns} transactions`;document.getElementById('live-badge').style.display='block';renderOverview(D);renderSpend(D);renderSubs(D);renderBudget(D);}
+function showTab(id,btn){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');if(btn)btn.classList.add('on');}
+function handleUpdate(){const csv=document.getElementById('csv-area').value.trim();const status=document.getElementById('update-status');status.style.display='none';if(!csv){showStatus('err','Paste your CSV first.');return;}const rows=parseCSV(csv);if(rows.length<5){showStatus('err','Could not parse — copy the full export including the header row.');return;}const D=processData(rows);if(!D){showStatus('err','No valid transactions found. Check your date range.');return;}const ts=new Date().toISOString();try{localStorage.setItem(STORAGE_KEY,JSON.stringify({rows,timestamp:ts}));}catch(e){}renderAll(D);document.getElementById('csv-area').value='';showStatus('ok',`✓ Loaded ${rows.length} transactions. Dashboard updated.`);document.getElementById('last-updated-ts').textContent=new Date(ts).toLocaleString();document.getElementById('last-updated-row').style.display='block';setTimeout(()=>showTab('overview',document.querySelector('.tab')),800);}
+function showStatus(type,msg){const el=document.getElementById('update-status');el.className=type;el.textContent=msg;el.style.display='block';}
+(function init(){try{const saved=localStorage.getItem(STORAGE_KEY);if(saved){const{rows,timestamp}=JSON.parse(saved);if(rows&&rows.length){const D=processData(rows);if(D){renderAll(D);if(timestamp){document.getElementById('last-updated-ts').textContent=new Date(timestamp).toLocaleString();document.getElementById('last-updated-row').style.display='block';}}}}}catch(e){}})();
+</script>
+</body>
+</html>
